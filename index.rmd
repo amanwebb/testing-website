@@ -8,12 +8,12 @@ output: html_document
 
 <br>
 
-### I went to BYU for my undergrad in Statistics and Analytics. I currently attend SMU, working towards a Master's in Data Science.  
+### I went to BYU for my undergrad in Statistics and Analytics. I currently attend SMU, working towards a Master's in Data Science. I want to work in sports analytics in the future.
 
 <br>
 
 
-### I am originally from Dallas, Texas, but now I reside in San Antonio.  
+### I am originally from Dallas, Texas, but now I reside in San Antonio. I hope to stay in Texas forever.  
 
 <br>
 <br>
