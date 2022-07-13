@@ -1,14 +1,21 @@
 ---
-title: "Simple Website"
-author: "Austin Webb"
-date: '2022-07-13'
+title: "Austin Webb's Data Science Website"
 output: html_document
 ---
 
 
-# Welcome to my website! My name is Austin Webb, and I am an aspiring Data Scientist.
+## Welcome to my website! My name is Austin Webb, and I am an aspiring Data Scientist.
 
-### I went to BYU for my undergrad in Statistics and Analytics. I currently attend SMU, working towards a Master's in Data Science. 
-### I am originally from Dallas, Texas, but now I reside in San Antonio. 
+<br>
+
+### I went to BYU for my undergrad in Statistics and Analytics. I currently attend SMU, working towards a Master's in Data Science.  
+
+<br>
+
+
+### I am originally from Dallas, Texas, but now I reside in San Antonio.  
+
+<br>
+<br>
 
 ### The other tabs represent work / analyses that I have completed.  Please check them out!
