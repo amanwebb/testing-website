@@ -10,3 +10,5 @@ output: html_document
 
 ### I went to BYU for my undergrad in Statistics and Analytics. I currently attend SMU, working towards a Master's in Data Science. 
 ### I am originally from Dallas, Texas, but now I reside in San Antonio. 
+
+### The other tabs represent work / analyses that I have completed.  Please check them out!
