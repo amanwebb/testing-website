@@ -1,0 +1,14 @@
+name: Beer_App
+title: Beer_App
+username:
+account: austin-webb
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6640031
+bundleId: 6097072
+url: https://austin-webb.shinyapps.io/Beer_App/
+when: 1657773612.01301
+lastSyncTime: 1657773612.01303
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|_site.yml|beerAndbrewery.html|beerAndbrewery.Rmd|index.html|index.rmd|ReadMe.html|ReadMe.md|beerAndbrewery_files|site_libs
