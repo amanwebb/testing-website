@@ -1,0 +1,163 @@
+---
+title: "Beer app"
+author: "Austin Webb"
+date: '2022-07-13'
+output: html_document
+---
+
+
+
+
+
+```{r}
+library(shiny)
+library(janitor)
+library(ggplot2)
+
+```
+
+```{r}
+
+#### UI ---------------------------------------------------------
+
+ui_upload <- sidebarLayout(
+ 
+  # sidebar ---------------------------------------------------------
+   
+  sidebarPanel(
+    fileInput("file", "Data", buttonLabel = "Upload..."),
+    textInput("delim", "Delimiter (leave blank to guess)", ""),
+    numericInput("rows", "Rows to preview", 5, min = 1),
+    hr(),
+    
+    checkboxInput("NAs", "Remove NAs?"),    
+    
+    selectInput('select',
+                label = h3('ABV or IBU'),
+                choices = c('ABV', 'IBU'),
+                selected = 1),  
+    
+    # Input: radio button for plot choice
+    radioButtons(inputId = 'plotChoice', 'Which plot?',
+                 choices = c('Histogram', 'Boxplot')
+                 ),    
+    
+    # Input: slider for number of bins
+    sliderInput(inputId = 'bins',
+                label = 'Number of Bins',
+                min = 1,
+                max = 50,
+                value = 30),
+
+    hr(),
+    fluidRow(column(3, verbatimTextOutput('value')))
+  ),
+
+  
+  # main ---------------------------------------------------------
+  mainPanel(
+    h3("Raw data"),
+    tableOutput("preview1")
+  )
+)
+
+ui_clean <- mainPanel(
+    h3("Cleaner data"),
+    tableOutput("preview2"),
+  
+  # Output: histogram
+    plotOutput(outputId = 'distPlot')
+)
+
+
+ui_download <- fluidRow(
+  column(width = 12, downloadButton("download", class = "btn-block"))
+)
+
+ui <- fluidPage(
+  ui_upload,
+  ui_clean,
+  ui_download
+)
+
+
+
+
+#### SERVER ---------------------------------------------------------
+
+server <- function(input, output, session) {
+  
+  # Upload ---------------------------------------------------------
+  raw <- reactive({
+    req(input$file)
+    delim <- if (input$delim == "") NULL else input$delim
+    vroom::vroom(input$file$datapath, delim = delim)
+  })
+  output$preview1 <- renderTable(head(raw(), input$rows))
+  
+ 
+  # Clean ----------------------------------------------------------
+  tidied <- reactive({
+    out <- raw()
+    if (input$NAs) {
+      names(out) <- na.omit(out)
+    }
+    
+  })
+
+  output$preview2 <- renderTable(head(tidied(), input$rows))
+  
+  # histogram ----------------------------------------------------------  
+  
+  output$distPlot <- renderPlot({
+    
+    beer <- tidied()
+    
+    if(input$select == 'ABV') {
+      
+    x <- beer$ABV
+    bins <- seq(min(x), 
+                max(x), 
+                length.out = input$bins + 1)
+    
+    hist(x, 
+         breaks = bins,
+         col = '#75AADB',
+         border = 'white',
+         xlab = 'ABV',
+         main = 'Histogram of ABV')
+    }
+    if(input$select == 'IBU') {
+      
+    x <- beer$IBU
+    bins <- seq(min(x), 
+                max(x), 
+                length.out = input$bins + 1)
+    
+    hist(x, 
+         breaks = bins,
+         col = '#75AADB',
+         border = 'white',
+         xlab = 'IBU',
+         main = 'Histogram of IBU')
+      
+    }
+  })
+  
+ 
+  # Download -------------------------------------------------------
+  output$download <- downloadHandler(
+    filename = function() {
+      paste0(tools::file_path_sans_ext(input$file$name), ".tsv")
+    },
+    content = function(file) {
+      vroom::vroom_write(tidied(), file)
+    }
+  )
+}
+
+
+shinyApp(ui, server)
+
+```
+
