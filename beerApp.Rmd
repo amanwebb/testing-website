@@ -32,17 +32,42 @@ ui_upload <- sidebarLayout(
     numericInput("rows", "Rows to preview", 5, min = 1),
     hr(),
     
-    checkboxInput("NAs", "Remove NAs?"),    
+    checkboxInput("NAs", "Remove NAs?"),
+    
+    selectInput('state', label=h3('Choose State'),
+                choices=list("All" = "All", 'Alabama'='AL', 'Alaska'='AK', 
+                             'Arizona'='AZ', 'Arkansas'='AR', 'California'='CA', 
+                             'Colorado'='CO', 'Connecticut'='CT', 'Delaware'='DE', 
+                             'Florida'='FL', 'Georgia'='GA', 'Hawaii'='HI', 
+                             'Idaho'='ID', 'Illinois'='IL', 'Indiana'='IN', 
+                             'Iowa'='IA', 'Kansas'='KS', 'Kentucky'='KY', 
+                             'Louisiana'='LA', 'Maine'='ME', 'Maryland'='MD', 
+                             'Massachusetts'='MA', 'Michigan'='MI', 
+                             'Minnesota'='MN', 'Mississippi'='MS', 'Missouri'='MO', 
+                             'Montana'='MT', 'Nebraska'='NE', 'Nevada'='NV', 
+                             'New Hampshire'='NH', 'New Jersey'='NJ',
+                             'New Mexico'='NM', 'New York'='NY', 'North Carolina'='NC', 
+                             'North Dakota'='ND', 'Ohio'='OH', 'Oklahoma'='OK', 
+                             'Oregon'='OR', 'Pennsylvania'='PA', 'Rhode Island'='RI', 
+                             'South Carolina'='SC', 'South Dakota'='SD', 
+                             'Tennessee'='TN', 'Texas'='TX', 'Utah'='UT', 
+                             'Vermont'='VT', 'Virginia'='VA', 'Washington'='WA', 
+                             'West Virginia'='WV', 'Wisconsin'='WI', 'Wyoming'='WY')),
+        
+    
+    hr(),
     
     selectInput('select',
                 label = h3('ABV or IBU'),
                 choices = c('ABV', 'IBU'),
-                selected = 1),  
+                selected = 1), 
+    hr(),
     
     # Input: radio button for plot choice
     radioButtons(inputId = 'plotChoice', 'Which plot?',
                  choices = c('Histogram', 'Boxplot', 'Scatterplot')
                  ),    
+    hr(),
     
     # Input: slider for number of bins
     sliderInput(inputId = 'bins',
@@ -61,10 +86,10 @@ ui_upload <- sidebarLayout(
   
   # main ---------------------------------------------------------
   mainPanel(
-    h3("Raw data"),
+    h3("Beer data"),
     tableOutput("preview1"),
     h3("Clean data"),
-    tableOutput("preview2"),
+    tableOutput("preview3"),
   
   # Output: histogram
     plotOutput('distPlot')
@@ -110,20 +135,29 @@ server <- function(input, output, session) {
     
   })
 
-  output$preview2 <- renderTable(head(tidied(), input$rows))
+  output$preview3 <- renderTable(head(tidied(), input$rows))
   
   # histogram ----------------------------------------------------------  
   
   output$distPlot <- renderPlot({
 
     beer <- tidied()
+    
+    # beer by state df    
+
+    beers <- if(input$state == 'All'){
+      tidied()
+    } else {
+      filter(tidied(), State == input$state)
+    }
+          
       
       
     if (input$plotChoice == "Histogram") {
 
       if(input$select == 'ABV') {
         
-        x <- beer$ABV
+        x <- beers$ABV
         
         bins <- seq(min(x), 
                     max(x), 
@@ -139,7 +173,7 @@ server <- function(input, output, session) {
       
       if(input$select == 'IBU') {
         print('0')
-        x <- beer$IBU
+        x <- beers$IBU
         
         bins <- seq(min(x), 
                     max(x), 
@@ -159,7 +193,7 @@ server <- function(input, output, session) {
 
       if(input$select == 'ABV') {
         
-        ggplot(beer, aes(x = ABV)) + 
+        ggplot(beers, aes(x = ABV)) + 
           geom_boxplot(fill = 'red', 
                        color = 'blue') +
           ggtitle('ABV Distribution')
@@ -167,7 +201,7 @@ server <- function(input, output, session) {
       
       else if(input$select == 'IBU') {
         
-        ggplot(beer, aes(x = IBU)) + 
+        ggplot(beers, aes(x = IBU)) + 
           geom_boxplot(fill = 'red', 
                        color = 'blue') +
           ggtitle('IBU Distribution')
@@ -183,7 +217,7 @@ server <- function(input, output, session) {
         
         if (input$Regression) {
           
-          ggplot(beer, aes(x = ABV, y = IBU)) + 
+          ggplot(beers, aes(x = ABV, y = IBU)) + 
           geom_point(color = 'red') +
           ggtitle('ABV vs IBU') +
           geom_smooth(method = lm, 
@@ -193,7 +227,7 @@ server <- function(input, output, session) {
         
         
         else {
-          ggplot(beer, aes(x = ABV, y = IBU)) + 
+          ggplot(beers, aes(x = ABV, y = IBU)) + 
           geom_point(color = 'red') +
           ggtitle('ABV vs IBU')
         } # end else regression statement
@@ -203,7 +237,7 @@ server <- function(input, output, session) {
         
         if (input$Regression) {
           
-          ggplot(beer, aes(x = ABV, y = IBU)) + 
+          ggplot(beers, aes(x = IBU, y = ABV)) + 
           geom_point(color = 'red') +
           ggtitle('IBU vs ABV') +
           geom_smooth(method = lm, 
@@ -212,7 +246,7 @@ server <- function(input, output, session) {
         } # end regression if statement
 
         else {
-          ggplot(beer, aes(x = ABV, y = IBU)) + 
+          ggplot(beers, aes(x = IBU, y = ABV)) + 
           geom_point(color = 'red') +
           ggtitle('IBU vs ABV') 
         } # end else regression statement
