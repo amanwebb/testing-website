@@ -156,7 +156,6 @@ server <- function(input, output, session) {
     if (input$plotChoice == "Histogram") {
 
       if(input$select == 'ABV') {
-        
         x <- beers$ABV
         
         bins <- seq(min(x), 
@@ -172,7 +171,6 @@ server <- function(input, output, session) {
       } # end the if abv 
       
       if(input$select == 'IBU') {
-        print('0')
         x <- beers$IBU
         
         bins <- seq(min(x), 
