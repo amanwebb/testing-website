@@ -14,7 +14,6 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```{r}
 library(shiny)
-library(janitor)
 library(ggplot2)
 
 ```
@@ -42,7 +41,7 @@ ui_upload <- sidebarLayout(
     
     # Input: radio button for plot choice
     radioButtons(inputId = 'plotChoice', 'Which plot?',
-                 choices = c('Histogram', 'Boxplot')
+                 choices = c('Histogram', 'Boxplot', 'Scatterplot')
                  ),    
     
     # Input: slider for number of bins
@@ -51,6 +50,9 @@ ui_upload <- sidebarLayout(
                 min = 1,
                 max = 50,
                 value = 30),
+    
+    # regression line
+    checkboxInput("Regression", "Add regression line?"),
 
     hr(),
     fluidRow(column(3, verbatimTextOutput('value')))
@@ -60,17 +62,18 @@ ui_upload <- sidebarLayout(
   # main ---------------------------------------------------------
   mainPanel(
     h3("Raw data"),
-    tableOutput("preview1")
-  )
-)
-
-ui_clean <- mainPanel(
-    h3("Cleaner data"),
+    tableOutput("preview1"),
+    h3("Clean data"),
     tableOutput("preview2"),
   
   # Output: histogram
-    plotOutput(outputId = 'distPlot')
+    plotOutput('distPlot')
+  )
 )
+
+
+
+
 
 
 ui_download <- fluidRow(
@@ -79,7 +82,6 @@ ui_download <- fluidRow(
 
 ui <- fluidPage(
   ui_upload,
-  ui_clean,
   ui_download
 )
 
@@ -113,40 +115,118 @@ server <- function(input, output, session) {
   # histogram ----------------------------------------------------------  
   
   output$distPlot <- renderPlot({
-    
+
     beer <- tidied()
-    
-    if(input$select == 'ABV') {
       
-    x <- beer$ABV
-    bins <- seq(min(x), 
-                max(x), 
-                length.out = input$bins + 1)
-    
-    hist(x, 
-         breaks = bins,
-         col = '#75AADB',
-         border = 'white',
-         xlab = 'ABV',
-         main = 'Histogram of ABV')
-    }
-    if(input$select == 'IBU') {
       
-    x <- beer$IBU
-    bins <- seq(min(x), 
-                max(x), 
-                length.out = input$bins + 1)
-    
-    hist(x, 
-         breaks = bins,
-         col = '#75AADB',
-         border = 'white',
-         xlab = 'IBU',
-         main = 'Histogram of IBU')
+    if (input$plotChoice == "Histogram") {
+
+      if(input$select == 'ABV') {
+        
+        x <- beer$ABV
+        
+        bins <- seq(min(x), 
+                    max(x), 
+                    length.out = input$bins + 1)
+        
+        hist(x, 
+             breaks = bins,
+             col = 'red',
+             border = 'blue',
+             xlab = 'ABV',
+             main = 'Histogram of ABV')
+      } # end the if abv 
       
-    }
-  })
+      if(input$select == 'IBU') {
+        print('0')
+        x <- beer$IBU
+        
+        bins <- seq(min(x), 
+                    max(x), 
+                    length.out = input$bins + 1)
+        
+        hist(x, 
+             breaks = bins,
+             col = 'red',
+             border = 'blue',
+             xlab = 'IBU',
+             main = 'Histogram of IBU')
+        
+      } # end the if ibu
+    } # end the if histogram
+    
+    else if (input$plotChoice == "Boxplot") {
+
+      if(input$select == 'ABV') {
+        
+        ggplot(beer, aes(x = ABV)) + 
+          geom_boxplot(fill = 'red', 
+                       color = 'blue') +
+          ggtitle('ABV Distribution')
+      } # end the if ibu
+      
+      else if(input$select == 'IBU') {
+        
+        ggplot(beer, aes(x = IBU)) + 
+          geom_boxplot(fill = 'red', 
+                       color = 'blue') +
+          ggtitle('IBU Distribution')
+        
+      } # end the if abv
+      
+    } # end the if boxplot 
+    
+    
+    else if (input$plotChoice == "Scatterplot") {
+      
+      if(input$select == 'ABV') {
+        
+        if (input$Regression) {
+          
+          ggplot(beer, aes(x = ABV, y = IBU)) + 
+          geom_point(color = 'red') +
+          ggtitle('ABV vs IBU') +
+          geom_smooth(method = lm, 
+                      color = 'blue', 
+                      fill = 'blue')  
+        } # end regression if statement
+        
+        
+        else {
+          ggplot(beer, aes(x = ABV, y = IBU)) + 
+          geom_point(color = 'red') +
+          ggtitle('ABV vs IBU')
+        } # end else regression statement
+      } # end the if abv
+      
+      else if(input$select == 'IBU') {
+        
+        if (input$Regression) {
+          
+          ggplot(beer, aes(x = ABV, y = IBU)) + 
+          geom_point(color = 'red') +
+          ggtitle('IBU vs ABV') +
+          geom_smooth(method = lm, 
+                      color = 'blue', 
+                      fill = 'blue')  
+        } # end regression if statement
+
+        else {
+          ggplot(beer, aes(x = ABV, y = IBU)) + 
+          geom_point(color = 'red') +
+          ggtitle('IBU vs ABV') 
+        } # end else regression statement
+      } # end the if ibu
+    } # end the if scatterplot
+    
+  }) # end the render plot
   
+  
+  
+  
+  
+  
+ 
  
   # Download -------------------------------------------------------
   output$download <- downloadHandler(
@@ -157,6 +237,7 @@ server <- function(input, output, session) {
       vroom::vroom_write(tidied(), file)
     }
   )
+  
 }
 
 
